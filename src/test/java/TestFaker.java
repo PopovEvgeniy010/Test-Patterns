@@ -1,46 +1,48 @@
-import com.github.javafaker.Faker;
-import org.junit.jupiter.api.BeforeAll;
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import entities.RegistrationInfo;
-import org.junit.platform.commons.util.StringUtils;
-import utis.DataGenerator;
+import org.openqa.selenium.Keys;
 
-import java.util.Locale;
+import java.time.Duration;
 
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
 public class TestFaker {
-    private  static Faker faker;
-
     @BeforeEach
     void setup() {
         open("http://localhost:9999");
     }
-    @BeforeAll void setUpAll() {faker = new Faker(new Locale("ru"));}
 
-    @Test void generateTest () {
-        String city = faker.address().city();
-        String date = faker.backToTheFuture().date();
-        String name = faker.name().fullName();
-        String phone = faker.phoneNumber().phoneNumber();
-       //String cardNumber = faker.finance().creditCard(CreditCardType.MASTERCARD);
-        System.out.println(name);
-        System.out.println(phone);
-        System.out.println(date);
-        System.out.println(city);
-        //System.out.println(cardNumber);
-    }
-    @Test void generateTestUtils(){
-        RegistrationInfo info = DataGenerator.Registration.generateInfo("ru");
-        printTestData(info);
-    }
-    private  void printTestData (String city, String date, String fullName, String phoneNumber){
-        System.out.println(StringUtils.replaceWhitespaceCharacters( "=", String.valueOf(30)));
-        System.out.println(city + "\n" + date + "\n" + fullName + "\n" + phoneNumber);
-        System.out.println(StringUtils.replaceWhitespaceCharacters("=", String.valueOf(30)));
-    }
-    private void printTestData(entities.RegistrationInfo registrationInfo){
-        printTestData(registrationInfo.getCity(),registrationInfo.getDate(),registrationInfo.getFullName(),registrationInfo.getPhoneNumber());
+    @Test
+    @DisplayName("Should successful plan and replan meeting")
+    void shouldSuccessfulPlanAndReplanMeeting() {
+        var validUser = DataGenerator.Registration.generateUser("ru");
+        var daysToAddForFirstMeeting = 4;
+        var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
+        var daysToAddForSecondMeeting = 7;
+        var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
+
+        $("[data-test-id=city] input").setValue(validUser.getCity());
+        $("[data-test-id=date] input").sendKeys(Keys.chord(Keys.SHIFT,Keys.HOME),Keys.BACK_SPACE);
+        $("[data-test-id=date] input").setValue(firstMeetingDate);
+        $("[data-test-id=name] input").setValue(validUser.getName());
+        $("[data-test-id=phone] input").setValue(validUser.getPhone());
+        $("[data-test-id=agreement] ").click();
+        $x("//span[contains(text(),'Запланировать')]").click();
+       $x("//div[contains(text(),'Успешно')]").should(Condition.appear, Duration.ofSeconds(15));
+        $("[data-test-id=date] input").sendKeys(Keys.chord(Keys.SHIFT,Keys.HOME),Keys.BACK_SPACE);
+        $("[data-test-id=date] input").setValue(secondMeetingDate);
+        $x("//span[contains(text(),'Запланировать')]").click();
+        $x("//span[text()='Перепланировать']").click();
+        $x("//span[contains(text(),'Успешно')]");
+
+
+
+
+
+
+
+
     }
 }
