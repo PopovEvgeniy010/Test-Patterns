@@ -4,7 +4,7 @@ stack: jdk 11
 
 branches:
   only:
-    - master
+    - main
 
 build: off
 
@@ -14,5 +14,10 @@ install:
 
 
 build_script:
+<<<<<<< HEAD
   - ./gradlew test --info -Dselenide.headless=true
 
+=======
+    - ./gradlew test --info 
+    - Dselenide.headless=true
+>>>>>>> d0bc77a5ec57343927ee3c7b2d5c19d301343871
